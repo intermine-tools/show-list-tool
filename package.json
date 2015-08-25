@@ -1,6 +1,6 @@
 {
   "name": "show-list-tools",
-  "version": "0.1.0",
+  "version": "0.99.99",
   "description": "A tool to show a results table in intermine-steps",
   "main": "server.js",
   "config": {
