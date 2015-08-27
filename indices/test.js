@@ -6,6 +6,10 @@ var chan = Channel.build({
 
 var itemsMsgs = {};
 
+function errorHandler(whatFailed, e){
+  console.log(whatFailed + " failed because: " + e);
+}
+
 chan.call({
   method: 'configure',
   params: {
@@ -15,31 +19,34 @@ chan.call({
     console.log("Tool configured");
   },
   error: function (e) {
-    console.log("configuration failed because: " + e);
+    errorHandler('configuration',e);
   }
 });
 
 function loadList () {
-  var listName = 'PL FlyAtlas_brain_top';
+  var listName = 'PL FlyAtlas_head_top';
   document.querySelector('.panel-heading').innerHTML = listName;
+  function error(e){ errorHandler('initialisation', e); }
+
   chan.call({
     method: 'init',
     params: {
       listName: listName,
       service: {
-        root: "http://www.flymine.org/query"
+        root: "http://www.flymine.org/query",
+        errorHandler : error
       }
     },
     success: function () {
       console.log("Tool initialised");
     },
-    error: function (e) {
-      console.log("initialisation failed because: " + e);
-    }
+    error: error
   });
 }
 
 function loadItem () {
+  function error(e){ errorHandler('initialisation', e); }
+
   var primaryId = 'FBgn0000606';
   document.querySelector('.panel-heading').innerHTML = primaryId;
   chan.call({
@@ -53,15 +60,14 @@ function loadItem () {
         }
       },
       service: {
-        root: "http://www.flymine.org/query"
+        root: "http://www.flymine.org/query",
+        errorHandler : error
       }
     },
     success: function () {
       console.log("Tool initialised");
     },
-    error: function (e) {
-      console.log("initialisation failed because: " + e);
-    }
+    error: error
   });
 
 }
@@ -91,17 +97,18 @@ chan.bind('wants', function (trans, params) {
 });
 
 chan.bind('has', function (trans, params) {
+  var key, msg, buffer = [];
   if (params.what === 'items') {
     itemsMsgs[params.data.key] = params.data;
   }
-  var key, msg, buffer = [];
   for (key in itemsMsgs) {
     msg = itemsMsgs[key];
-    if (msg.ids.length) {
-      buffer.push(msg.noun + ' (' + msg.categories + '): ' + msg.ids.join(', '));
+    if (msg.ids && msg.ids.length) {
+      buffer.push(msg.type + ' (' + msg.categories + '): ' + msg.id.join(', '));
+    } else if (msg.id) {
+      buffer.push(msg.type + ' (' + msg.categories + '): ' + msg.id.join(', '));
     }
   }
-
   document.getElementById('stdout').innerHTML = buffer.join('\n');
 });
 

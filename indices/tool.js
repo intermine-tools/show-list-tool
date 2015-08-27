@@ -7,7 +7,7 @@ require.config({
         q: loc + 'bower_components/q/q',
         underscore: loc + 'bower_components/underscore/underscore',
         bootstrap: loc + 'bower_components/bootstrap/dist/js/bootstrap.min',
-        react: loc + 'bower_components/react/react-with-addons', 
+        react: loc + 'bower_components/react/react-with-addons',
         jschannel: loc + 'bower_components/jschannel/src/jschannel',
         imjs:  loc + 'bower_components/imjs/js/im'
     },
@@ -93,9 +93,11 @@ require([
     });
 
     function initList (params) {
-
       var listName = params.listName;
       var serviceArgs = params.service;
+      serviceArgs.errorHandler = function(error){
+        console.error('Communication error!\n', error);
+      }
       var service = imjs.Service.connect(serviceArgs);
 
       return service.fetchList(listName).then(function showList (list) {
@@ -122,7 +124,6 @@ require([
           reportItems(service, list.type, list.type, ids, ['available']);
         });
         return listView;
-
       });
     }
 
@@ -177,22 +178,41 @@ require([
     }
 
     function reportItems (service, path, type, ids, categories) {
-      if (!categories) {
-        categories = ['selected'];
-      }
-      chan.notify({
-        method: 'has',
-        params: {
-          what: 'items',
-          data: {
-            key: (categories.join(',') + '-' + path), // String - any identifier.
-            type: type, // String - eg: "Protein"
-            categories: categories, // Array[string] - eg: ['selected']
-            ids: ids,  // Array[Int] - eg: [123, 456, 789]
-            service: {root: service.root}
-          }
-        }
-      });
+      //once to notify for item, once for itemS.
+      chan.notify(makeItems(service, path, type, ids, categories, true));
+      chan.notify(makeItems(service, path, type, ids, categories));
     }
 
 });
+
+/**
+ * Prepare data for a 'has' item/items jschannel notification.
+ * @param  {boolean} singleItem set to true if returning only a single item, not an array of items.
+ * @return {jschannel notification object} notification object containing the data to be passed to other tools in steps.
+ */
+function makeItems(service, path, type, ids, categories, singleItem) {
+  var what = 'items',
+  theIds = ids;
+  if (!categories) {
+    categories = ['selected'];
+  }
+
+  if(singleItem) {
+    what = 'item';
+    theIds = (ids.length === 1) ? ids[0]: [];
+  }
+
+  return {
+    method: 'has',
+    params: {
+      what: what,
+      data: {
+        key: (categories.join(',') + '-' + path), // String - any identifier.
+        type: type, // String - eg: "Protein"
+        categories: categories, // Array[string] - eg: ['selected']
+        id: theIds,  // Array[Int] - eg: [123, 456, 789]
+        service: {root: service.root}
+      }
+    }
+  };
+}
