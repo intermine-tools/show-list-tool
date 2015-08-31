@@ -178,9 +178,8 @@ require([
     }
 
     function reportItems (service, path, type, ids, categories) {
-      //once to notify for item, once for itemS.
-      chan.notify(makeItems(service, path, type, ids, categories, true));
-      chan.notify(makeItems(service, path, type, ids, categories));
+        chan.notify(makeItems(service, path, type, ids, categories));
+        chan.notify(makeItems(service, path, type, ids, categories, true));
     }
 
 });
@@ -191,6 +190,7 @@ require([
  * @return {jschannel notification object} notification object containing the data to be passed to other tools in steps.
  */
 function makeItems(service, path, type, ids, categories, singleItem) {
+
   var what = 'items',
   theIds = ids;
   if (!categories) {
@@ -202,17 +202,23 @@ function makeItems(service, path, type, ids, categories, singleItem) {
     theIds = (ids.length === 1) ? ids[0]: [];
   }
 
+  var data = null;
+
+  if (theIds && theIds.length > 0) {
+    data = {
+      key: (categories.join(',') + '-' + path), // String - any identifier.
+      type: type, // String - eg: "Protein"
+      categories: categories, // Array[string] - eg: ['selected']
+      id: theIds,  // Array[Int] - eg: [123, 456, 789]
+      service: service
+    }
+  }
+
   return {
     method: 'has',
     params: {
       what: what,
-      data: {
-        key: (categories.join(',') + '-' + path), // String - any identifier.
-        type: type, // String - eg: "Protein"
-        categories: categories, // Array[string] - eg: ['selected']
-        id: theIds,  // Array[Int] - eg: [123, 456, 789]
-        service: {root: service.root}
-      }
+      data: data
     }
   };
 }
