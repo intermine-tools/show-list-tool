@@ -35,9 +35,12 @@ define(['react', 'q', 'underscore', './mixins', './dropdown', './filter-box'],
 
       var viewChoosers = d.div(
         {className: 'pull-right btn-group'},
+
         this.renderViewChooser('grid', 'Grid', 'th-large'),
-        this.renderViewChooser('table', 'Table', 'th-list'),
-        this.renderViewChooser('details', 'Details', 'bars'));
+        this.renderViewChooser('table', 'Table', 'th-list')
+      // put this back when we have a details view that looks good
+      //  this.renderViewChooser('details', 'Details', 'bars')
+        );
 
       var segments = this.state.segments.map(function (seg, i, a) {
         var isLast = i + 1 == a.length;

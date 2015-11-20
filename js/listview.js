@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
 
   'use strict';
-  
+
   var React = require('react')
     , localStorage = require('./local-storage')
     , mixins = require('./mixins')
@@ -20,7 +20,7 @@ define(function (require, exports, module) {
     getInitialState: function () {
       return {
         path: this.props.list.type,
-        view: (localStorage[viewKey] || 'grid'), 
+        view: (localStorage[viewKey] || 'table'), 
         selected: {},
         classkeys: {}
       }
@@ -108,7 +108,7 @@ define(function (require, exports, module) {
       console.log(selected);
       for (path in selected) {
         var selections = selected[path];
-        
+
         if (path === list.type) {
           if (selections.all) {
             props.onSelectedList(list);
