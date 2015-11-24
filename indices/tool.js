@@ -119,16 +119,16 @@ require([
             type: list.type
           }
         });
-        list.contents().then(function (objs) {
-          var ids = objs.map(function (o) { return o.objectId; });
-          reportItems(service, list.type, list.type, ids, ['available']);
-        });
+        // list.contents().then(function (objs) {
+        //   var ids = objs.map(function (o) { return o.objectId; });
+        //   reportItems(service, list.type, list.type, ids, ['available']);
+        // });
         return listView;
       });
     }
 
     function initItem (params) {
-
+      debugger
       var type = params.item.type; // eg: "Gene"
       var fields = params.item.fields; // eg: {'organism.taxonId': 7227, primaryIdentifier: 'FBGN000123'}
       var serviceArgs = params.service;
